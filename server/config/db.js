@@ -8,11 +8,13 @@ const connectDB = async () =>{
         if (!uri) {
             throw new Error('MONGO_URI is not defined in environment');
         }
-        await mongoose.connect(uri);
+        // set a short serverSelectionTimeoutMS so failed attempts return quickly during development
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
         console.log('Database connected successfully');
     } catch (error) {
         console.log('Database connection failed');
-        console.error(error);
+        // Print concise error message to help diagnose (don't accidentally leak sensitive info)
+        console.error(error && error.message ? error.message : error);
     }
 }
 export default connectDB;

@@ -9,7 +9,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // backend default PORT is 4000 (see server/.env)
+        target: 'http://localhost:4000',
         changeOrigin: true,
         secure: false,
       },
