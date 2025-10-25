@@ -1,13 +1,20 @@
 import jwt from 'jsonwebtoken';
+import User from '../Admins/models/user.js';
 
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers?.authorization;
   if (!authHeader) return next();
   const token = authHeader.split(' ')[1];
   if (!token) return next();
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    req.user = { id: payload.id, role: payload.role };
+    // Fetch full user object including institutionId
+    const user = await User.findById(payload.id).select('-password');
+    if (user) {
+      req.user = user;
+    } else {
+      req.user = { _id: payload.id, role: payload.role };
+    }
   } catch (err) {
     console.error('JWT verify error:', err.message);
     // don't block if token invalid for optional verification; treat as unauthenticated

@@ -1,73 +1,128 @@
-import React, { useEffect, useState } from 'react'
-import Login from './components/Login.jsx'
-import Register from './components/Register.jsx'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Login.jsx';
+import Register from './components/Register.jsx';
+import SuperAdminDashboard from './pages/SuperAdminDashboard.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
+import CreateInstitutionAdmin from './components/CreateInstitutionAdmin.jsx';
+import ManageAdmins from './pages/ManageAdmins.jsx';
 
-const App = () => {
-  const [view, setView] = useState('home') // home | login | register
-  const [message, setMessage] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  const fetchTest = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      // Use a relative path so Vite dev server can proxy to the backend
-      const res = await fetch('/api/test')
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data = await res.json()
-      setMessage(data.message)
-    } catch (err) {
-      setError(err.message)
-      setMessage(null)
-    } finally {
-      setLoading(false)
-    }
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
   }
 
-  useEffect(() => {
-    fetchTest()
-  }, [])
+  // Decode token to check role (simple JWT decode, not validated here)
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    
+    if (allowedRoles.length > 0 && !allowedRoles.includes(payload.role)) {
+      // Redirect to appropriate dashboard based on role
+      if (payload.role === 'superadmin') {
+        return <Navigate to="/superadmin/dashboard" replace />;
+      } else if (payload.role === 'institution_admin') {
+        return <Navigate to="/admin/dashboard" replace />;
+      }
+      return <Navigate to="/login" replace />;
+    }
+    
+    return children;
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    localStorage.removeItem('token');
+    return <Navigate to="/login" replace />;
+  }
+};
 
-  const token = localStorage.getItem('token')
+// Public Route Component (redirect if already logged in)
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      
+      if (payload.role === 'superadmin') {
+        return <Navigate to="/superadmin/dashboard" replace />;
+      } else if (payload.role === 'institution_admin') {
+        return <Navigate to="/admin/dashboard" replace />;
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      localStorage.removeItem('token');
+    }
+  }
+  
+  return children;
+};
 
+const App = () => {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 20 }}>
-      <header style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <h1 style={{ margin: 0 }}>LearnNest — Auth demo</h1>
-        <nav style={{ marginLeft: 'auto' }}>
-          <button onClick={() => setView('home')} style={{ marginRight: 8 }}>Home</button>
-          <button onClick={() => setView('login')} style={{ marginRight: 8 }}>Login</button>
-          <button onClick={() => setView('register')}>Register</button>
-        </nav>
-      </header>
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } 
+        />
 
-      <main style={{ marginTop: 18 }}>
-        {view === 'home' && (
-          <section>
-            <h2>Backend test</h2>
-            <div style={{ marginTop: 12 }}>
-              <button onClick={fetchTest} disabled={loading}>
-                {loading ? 'Checking...' : 'Check API'}
-              </button>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              {loading && <div>Loading...</div>}
-              {error && <div style={{ color: 'red' }}>Error: {error}</div>}
-              {message && <div style={{ color: 'green' }}>{message}</div>}
-            </div>
+        {/* SuperAdmin Routes */}
+        <Route
+          path="/superadmin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['superadmin']}>
+              <SuperAdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/create-admin"
+          element={
+            <ProtectedRoute allowedRoles={['superadmin']}>
+              <CreateInstitutionAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/manage-admins"
+          element={
+            <ProtectedRoute allowedRoles={['superadmin']}>
+              <ManageAdmins />
+            </ProtectedRoute>
+          }
+        />
 
-            <div style={{ marginTop: 20 }}>
-              <strong>Token:</strong> {token ? <span style={{ color: 'green' }}>Present</span> : <span style={{ color: 'gray' }}>Not signed in</span>}
-            </div>
-          </section>
-        )}
+        {/* Institution Admin Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['institution_admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {view === 'login' && <Login onSuccess={() => setView('home')} />}
-        {view === 'register' && <Register onSuccess={() => setView('login')} />}
-      </main>
-    </div>
-  )
-}
+        {/* Default Routes */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;

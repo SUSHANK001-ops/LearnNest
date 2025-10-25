@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
         enum: ['superadmin', 'institution_admin'],
         default: 'institution_admin',
     },
+    isFirstLogin: {
+        type: Boolean,
+        default: true,
+    },
 }, { timestamps: true });
 
 // Hash password before saving
