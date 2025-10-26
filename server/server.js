@@ -63,10 +63,16 @@ app.use(cors(corsOptions));
 
 import authRoutes from './Admins/Routes/auth.js';
 import institutionRoutes from './routes/institutionRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import teacherRoutes from './routes/teacherRoutes.js';
 
 // Mount auth routes
 app.use('/api/auth', authRoutes);
 app.use('/api/institutions', institutionRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/teachers', teacherRoutes);
 
 app.get("/", (req, res) => {
   res.json({ 
