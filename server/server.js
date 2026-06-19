@@ -8,8 +8,8 @@ import compression from 'compression';
 
 dotenv.config();
 const app = express();
-import connectDB  from "./config/db.js";
-import User from './Admins/models/user.js';
+import connectDB, { prisma }  from "./config/db.js";
+import bcrypt from 'bcryptjs';
 
 const port = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
@@ -119,16 +119,20 @@ app.use((req, res) => {
     const superEmail = process.env.SUPERADMIN_EMAIL;
     const superPassword = process.env.SUPERADMIN_PASSWORD;
     if (superEmail && superPassword) {
-      const existing = await User.findOne({ role: 'superadmin' });
+      const existing = await prisma.user.findFirst({ where: { role: 'superadmin' } });
       if (!existing) {
-        const defaultSuper = new User({
-          fullname: { firstname: 'Super', lastname: 'Admin' },
-          username: 'superadmin',
-          email: superEmail,
-          password: superPassword,
-          role: 'superadmin',
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(superPassword, salt);
+        await prisma.user.create({
+          data: {
+            firstname: 'Super',
+            lastname: 'Admin',
+            username: 'superadmin',
+            email: superEmail,
+            password: hashedPassword,
+            role: 'superadmin',
+          }
         });
-        await defaultSuper.save();
         console.log('Default SuperAdmin created:', superEmail);
       } 
     } else {

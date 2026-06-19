@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../Admins/models/user.js';
+import { prisma } from '../config/db.js';
 
 export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers?.authorization;
@@ -8,16 +8,17 @@ export const verifyToken = async (req, res, next) => {
   if (!token) return next();
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    // Fetch full user object including institutionId
-    const user = await User.findById(payload.id).select('-password');
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id }
+    });
     if (user) {
-      req.user = user;
+      const { password, ...userWithoutPassword } = user;
+      req.user = userWithoutPassword;
     } else {
-      req.user = { _id: payload.id, role: payload.role };
+      req.user = { id: payload.id, role: payload.role };
     }
   } catch (err) {
     console.error('JWT verify error:', err.message);
-    // don't block if token invalid for optional verification; treat as unauthenticated
   }
   next();
 };
