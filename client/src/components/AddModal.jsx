@@ -31,9 +31,9 @@ const AddModal = ({
         email: initialData.email || '',
         title: initialData.title || '',
         description: initialData.description || '',
-        teacher: initialData.teacher?._id || '',
-        enrolledCourses: initialData.enrolledCourses?.map(c => c._id) || [],
-        assignedCourses: initialData.assignedCourses?.map(c => c._id) || []
+        teacher: initialData.teacher?.id || '',
+        enrolledCourses: initialData.enrolledCourses?.map(c => c.id) || [],
+        assignedCourses: initialData.assignedCourses?.map(c => c.id) || []
       });
     } else {
       setFormData({
@@ -145,7 +145,7 @@ const AddModal = ({
                 >
                   <option value="">No teacher</option>
                   {teachers.map(teacher => (
-                    <option key={teacher._id} value={teacher._id}>
+                    <option key={teacher.id} value={teacher.id}>
                       {teacher.name} ({teacher.email})
                     </option>
                   ))}
@@ -201,7 +201,7 @@ const AddModal = ({
                   size="5"
                 >
                   {courses.map(course => (
-                    <option key={course._id} value={course._id}>
+                    <option key={course.id} value={course.id}>
                       {course.title}
                     </option>
                   ))}
@@ -258,7 +258,7 @@ const AddModal = ({
                   size="5"
                 >
                   {courses.map(course => (
-                    <option key={course._id} value={course._id}>
+                    <option key={course.id} value={course.id}>
                       {course.title}
                     </option>
                   ))}

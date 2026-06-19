@@ -57,11 +57,11 @@ const CourseCard = ({ course, onEdit, onDelete }) => {
 
 CourseCard.propTypes = {
   course: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     teacher: PropTypes.shape({
-      _id: PropTypes.string,
+      id: PropTypes.string,
       name: PropTypes.string,
       email: PropTypes.string,
     }),

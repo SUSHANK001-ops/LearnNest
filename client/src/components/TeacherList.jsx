@@ -16,7 +16,7 @@ const TeacherList = ({ teachers, onEdit, onDelete, onAssign }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {teachers.map((teacher) => (
         <div
-          key={teacher._id}
+          key={teacher.id}
           className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
         >
           <div className="flex items-start justify-between mb-4">
@@ -44,7 +44,7 @@ const TeacherList = ({ teachers, onEdit, onDelete, onAssign }) => {
               {teacher.assignedCourses && teacher.assignedCourses.length > 0 ? (
                 teacher.assignedCourses.map((course) => (
                   <div
-                    key={course._id}
+                    key={course.id}
                     className="text-sm bg-purple-50 text-purple-700 px-3 py-1.5 rounded-md"
                   >
                     📘 {course.title}
@@ -91,12 +91,12 @@ const TeacherList = ({ teachers, onEdit, onDelete, onAssign }) => {
 TeacherList.propTypes = {
   teachers: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       assignedCourses: PropTypes.arrayOf(
         PropTypes.shape({
-          _id: PropTypes.string,
+          id: PropTypes.string,
           title: PropTypes.string,
         })
       ),

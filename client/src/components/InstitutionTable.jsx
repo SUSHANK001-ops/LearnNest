@@ -6,7 +6,7 @@ const InstitutionTable = ({ institutions, onEdit, onDelete, loading }) => {
   const [editFormData, setEditFormData] = useState({});
 
   const handleEdit = (institution) => {
-    setEditingId(institution._id);
+    setEditingId(institution.id);
     setEditFormData({
       name: institution.name,
       email: institution.email,
@@ -100,10 +100,10 @@ const InstitutionTable = ({ institutions, onEdit, onDelete, loading }) => {
         <tbody className="bg-white divide-y divide-gray-200">
           {institutions.map((institution, index) => (
             <tr
-              key={institution._id}
+              key={institution.id}
               className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
             >
-              {editingId === institution._id ? (
+              {editingId === institution.id ? (
                 <>
                   <td className="px-6 py-4">
                     <input
@@ -147,7 +147,7 @@ const InstitutionTable = ({ institutions, onEdit, onDelete, loading }) => {
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
                     <button
-                      onClick={() => handleSaveEdit(institution._id)}
+                      onClick={() => handleSaveEdit(institution.id)}
                       className="text-green-600 hover:text-green-900"
                     >
                       Save
@@ -189,7 +189,7 @@ const InstitutionTable = ({ institutions, onEdit, onDelete, loading }) => {
                       Edit
                     </button>
                     <button
-                      onClick={() => onDelete(institution._id)}
+                      onClick={() => onDelete(institution.id)}
                       className="text-red-600 hover:text-red-900"
                     >
                       Delete
@@ -208,7 +208,7 @@ const InstitutionTable = ({ institutions, onEdit, onDelete, loading }) => {
 InstitutionTable.propTypes = {
   institutions: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       address: PropTypes.string.isRequired,

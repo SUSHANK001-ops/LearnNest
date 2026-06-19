@@ -73,7 +73,7 @@ const ManageAdmins = () => {
     setUsername(admin.username || '');
     setEmail(admin.email || '');
     setPassword('');
-    setInstitutionId(admin.institutionId?._id || '');
+    setInstitutionId(admin.institutionId?.id || '');
     setShowEditModal(true);
   };
 
@@ -93,7 +93,7 @@ const ManageAdmins = () => {
         updateData.password = password;
       }
 
-      const response = await fetch(`${API_URL}/api/auth/admins/${editingAdmin._id}`, {
+      const response = await fetch(`${API_URL}/api/auth/admins/${editingAdmin.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -258,7 +258,7 @@ const ManageAdmins = () => {
                   </tr>
                 ) : (
                   admins.map((admin) => (
-                    <tr key={admin._id} className="hover:bg-gray-50">
+                    <tr key={admin.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {admin.fullname?.firstname} {admin.fullname?.lastname}
@@ -291,7 +291,7 @@ const ManageAdmins = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(admin._id, admin.username)}
+                          onClick={() => handleDelete(admin.id, admin.username)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
@@ -400,7 +400,7 @@ const ManageAdmins = () => {
                 >
                   <option value="">-- Select Institution --</option>
                   {institutions.map((inst) => (
-                    <option key={inst._id} value={inst._id}>
+                    <option key={inst.id} value={inst.id}>
                       {inst.name} ({inst.domain})
                     </option>
                   ))}

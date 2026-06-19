@@ -189,7 +189,7 @@ const MyInstitutionCard = ({ institution, loading }) => {
 
 MyInstitutionCard.propTypes = {
   institution: PropTypes.shape({
-    _id: PropTypes.string,
+    id: PropTypes.string,
     name: PropTypes.string,
     email: PropTypes.string,
     address: PropTypes.string,

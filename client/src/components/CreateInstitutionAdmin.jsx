@@ -70,7 +70,7 @@ export default function CreateInstitutionAdmin() {
       if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
       
       // Get institution details for the download
-      const selectedInstitution = institutions.find(inst => inst._id === institutionId);
+      const selectedInstitution = institutions.find(inst => inst.id === institutionId);
       
       // Automatically download credentials
       downloadCredentials({
@@ -203,7 +203,7 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
               >
                 <option value="">-- Select an Institution --</option>
                 {institutions.map((inst) => (
-                  <option key={inst._id} value={inst._id}>
+                  <option key={inst.id} value={inst.id}>
                     {inst.name} ({inst.domain})
                   </option>
                 ))}

@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 
     try {
       const url = editingItem 
-        ? `${API_URL}${endpoints[modalType]}/${editingItem._id}`
+        ? `${API_URL}${endpoints[modalType]}/${editingItem.id}`
         : `${API_URL}${endpoints[modalType]}`;
       
       const method = editingItem ? 'PUT' : 'POST';
@@ -225,7 +225,7 @@ const AdminDashboard = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/api/students/${student._id}/enroll`, {
+      const response = await fetch(`${API_URL}/api/students/${student.id}/enroll`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/api/teachers/${teacher._id}/assign`, {
+      const response = await fetch(`${API_URL}/api/teachers/${teacher.id}/assign`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -413,10 +413,10 @@ const AdminDashboard = () => {
                 {courses.length > 0 ? (
                   courses.map(course => (
                     <CourseCard
-                      key={course._id}
+                      key={course.id}
                       course={course}
                       onEdit={(c) => openModal('course', c)}
-                      onDelete={(c) => handleDelete('course', c._id)}
+                      onDelete={(c) => handleDelete('course', c.id)}
                     />
                   ))
                 ) : (
@@ -451,7 +451,7 @@ const AdminDashboard = () => {
               <StudentTable
                 students={students}
                 onEdit={(s) => openModal('student', s)}
-                onDelete={(s) => handleDelete('student', s._id)}
+                onDelete={(s) => handleDelete('student', s.id)}
                 onEnroll={handleEnrollStudent}
               />
             )}
@@ -480,7 +480,7 @@ const AdminDashboard = () => {
               <TeacherList
                 teachers={teachers}
                 onEdit={(t) => openModal('teacher', t)}
-                onDelete={(t) => handleDelete('teacher', t._id)}
+                onDelete={(t) => handleDelete('teacher', t.id)}
                 onAssign={handleAssignTeacher}
               />
             )}

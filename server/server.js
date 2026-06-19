@@ -55,7 +55,7 @@ app.use(cookieParser());
 const corsOptions = {
   origin: isProduction 
     ? process.env.CLIENT_URL || 'https://yourdomain.com' 
-    : ['http://localhost:5173', 'http://localhost:3000'],
+    : [/^http:\/\/localhost:\d+$/],
   credentials: true,
   optionsSuccessStatus: 200
 };

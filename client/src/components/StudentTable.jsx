@@ -34,7 +34,7 @@ const StudentTable = ({ students, onEdit, onDelete, onEnroll }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {students.map((student) => (
-              <tr key={student._id} className="hover:bg-gray-50 transition-colors">
+              <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -55,7 +55,7 @@ const StudentTable = ({ students, onEdit, onDelete, onEnroll }) => {
                     {student.enrolledCourses && student.enrolledCourses.length > 0 ? (
                       student.enrolledCourses.map((course) => (
                         <span
-                          key={course._id}
+                          key={course.id}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                         >
                           {course.title}
@@ -103,12 +103,12 @@ const StudentTable = ({ students, onEdit, onDelete, onEnroll }) => {
 StudentTable.propTypes = {
   students: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
       enrolledCourses: PropTypes.arrayOf(
         PropTypes.shape({
-          _id: PropTypes.string,
+          id: PropTypes.string,
           title: PropTypes.string,
         })
       ),
