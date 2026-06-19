@@ -1,4 +1,5 @@
-import User from '../models/user.js';
+import { prisma } from '../../config/db.js';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
@@ -11,36 +12,48 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // If creating a superadmin, ensure only one exists
     if (role === 'superadmin') {
-      const existingSuper = await User.findOne({ role: 'superadmin' });
+      const existingSuper = await prisma.user.findFirst({ where: { role: 'superadmin' } });
       if (existingSuper) return res.status(403).json({ message: 'Superadmin already exists' });
     }
 
-    // If creating institution_admin, require that the requester is a superadmin
     if (role === 'institution_admin') {
       if (!req.user || req.user.role !== 'superadmin') {
         return res.status(403).json({ message: 'Only superadmin can create institution admin' });
       }
-      // Require institutionId for institution_admin
       if (!institutionId) {
         return res.status(400).json({ message: 'Institution ID is required for institution admin' });
       }
     }
 
-    const user = new User({ 
-      fullname, 
-      username, 
-      email, 
-      password, 
-      role: role || 'institution_admin',
-      institutionId: institutionId || null
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Provide default firstname and lastname from fullname if it's passed as an object or split
+    let firstname = '';
+    let lastname = '';
+    if (typeof fullname === 'object') {
+        firstname = fullname.firstname;
+        lastname = fullname.lastname || '';
+    } else {
+        firstname = fullname;
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        firstname,
+        lastname,
+        username,
+        email,
+        password: hashedPassword,
+        role: role || 'institution_admin',
+        institutionId: institutionId || null
+      }
     });
-    await user.save();
-    return res.status(201).json({ message: 'User created', userId: user._id });
+
+    return res.status(201).json({ message: 'User created', userId: user.id });
   } catch (err) {
     console.error(err);
-    if (err.code === 11000) return res.status(400).json({ message: 'Email already exists' });
+    if (err.code === 'P2002') return res.status(400).json({ message: 'Email already exists' });
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -49,16 +62,18 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing email or password' });
-    const user = await User.findOne({ email });
+    
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-    const match = await user.comparePassword(password);
+    
+    const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
     return res.json({ 
       token, 
       user: { 
-        id: user._id, 
+        id: user.id, 
         email: user.email, 
         username: user.username, 
         role: user.role,
@@ -71,17 +86,27 @@ export const login = async (req, res) => {
   }
 };
 
-// Get all institution admins (SuperAdmin only)
 export const getAllAdmins = async (req, res) => {
   try {
-    const admins = await User.find({ role: 'institution_admin' })
-      .populate('institutionId', 'name domain')
-      .select('-password')
-      .sort({ createdAt: -1 });
+    const admins = await prisma.user.findMany({
+      where: { role: 'institution_admin' },
+      include: {
+        institution: {
+          select: { name: true, domain: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
     
+    // Remove passwords before returning
+    const safeAdmins = admins.map(admin => {
+        const { password, ...safe } = admin;
+        return safe;
+    });
+
     return res.status(200).json({ 
       success: true,
-      data: admins 
+      data: safeAdmins 
     });
   } catch (err) {
     console.error(err);
@@ -89,13 +114,12 @@ export const getAllAdmins = async (req, res) => {
   }
 };
 
-// Update admin (SuperAdmin only)
 export const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     const { fullname, username, email, password, institutionId } = req.body;
 
-    const user = await User.findById(id);
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return res.status(404).json({ message: 'Admin not found' });
     }
@@ -104,39 +128,48 @@ export const updateAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Can only update institution admins' });
     }
 
-    // Update fields
-    if (fullname) user.fullname = fullname;
-    if (username) user.username = username;
-    if (email) user.email = email;
-    if (password) user.password = password; // Will be hashed by pre-save hook
-    if (institutionId !== undefined) user.institutionId = institutionId || null;
+    const updateData = {};
+    if (fullname) {
+        if (typeof fullname === 'object') {
+            updateData.firstname = fullname.firstname;
+            updateData.lastname = fullname.lastname || '';
+        } else {
+            updateData.firstname = fullname;
+        }
+    }
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+    if (password) updateData.password = await bcrypt.hash(password, 10);
+    if (institutionId !== undefined) updateData.institutionId = institutionId || null;
 
-    await user.save();
+    const updatedUser = await prisma.user.update({
+        where: { id },
+        data: updateData
+    });
 
     return res.status(200).json({ 
       success: true,
       message: 'Admin updated successfully',
       data: {
-        id: user._id,
-        fullname: user.fullname,
-        username: user.username,
-        email: user.email,
-        institutionId: user.institutionId
+        id: updatedUser.id,
+        fullname: { firstname: updatedUser.firstname, lastname: updatedUser.lastname },
+        username: updatedUser.username,
+        email: updatedUser.email,
+        institutionId: updatedUser.institutionId
       }
     });
   } catch (err) {
     console.error(err);
-    if (err.code === 11000) return res.status(400).json({ message: 'Email already exists' });
+    if (err.code === 'P2002') return res.status(400).json({ message: 'Email already exists' });
     return res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Delete admin (SuperAdmin only)
 export const deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findById(id);
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return res.status(404).json({ message: 'Admin not found' });
     }
@@ -145,7 +178,7 @@ export const deleteAdmin = async (req, res) => {
       return res.status(400).json({ message: 'Can only delete institution admins' });
     }
 
-    await User.findByIdAndDelete(id);
+    await prisma.user.delete({ where: { id } });
 
     return res.status(200).json({ 
       success: true,
@@ -157,19 +190,21 @@ export const deleteAdmin = async (req, res) => {
   }
 };
 
-// Export admin details for a specific institution (SuperAdmin only)
-// WARNING: This includes sensitive data - use with caution
 export const exportInstitutionAdmins = async (req, res) => {
   try {
     const { institutionId } = req.params;
 
-    // Find all admins for this institution
-    const admins = await User.find({ 
-      role: 'institution_admin',
-      institutionId: institutionId 
-    })
-    .populate('institutionId', 'name domain email')
-    .select('-__v');
+    const admins = await prisma.user.findMany({
+      where: { 
+        role: 'institution_admin',
+        institutionId: institutionId 
+      },
+      include: {
+        institution: {
+          select: { name: true, domain: true, email: true }
+        }
+      }
+    });
 
     if (admins.length === 0) {
       return res.status(404).json({ 
@@ -178,17 +213,14 @@ export const exportInstitutionAdmins = async (req, res) => {
       });
     }
 
-    // Format data for export
     const exportData = admins.map(admin => ({
-      institution: admin.institutionId?.name || 'N/A',
-      domain: admin.institutionId?.domain || 'N/A',
-      institutionEmail: admin.institutionId?.email || 'N/A',
-      adminFirstName: admin.fullname?.firstname || '',
-      adminLastName: admin.fullname?.lastname || '',
+      institution: admin.institution?.name || 'N/A',
+      domain: admin.institution?.domain || 'N/A',
+      institutionEmail: admin.institution?.email || 'N/A',
+      adminFirstName: admin.firstname || '',
+      adminLastName: admin.lastname || '',
       username: admin.username,
       email: admin.email,
-      // Note: We cannot export the actual password as it's hashed
-      // You should generate a temporary password and send it separately
       passwordNote: 'HASHED - Generate temporary password',
       createdAt: admin.createdAt,
       lastUpdated: admin.updatedAt
@@ -209,28 +241,30 @@ export const exportInstitutionAdmins = async (req, res) => {
   }
 };
 
-// Export ALL admin details (SuperAdmin only)
-// WARNING: This includes sensitive data - use with extreme caution
 export const exportAllAdmins = async (req, res) => {
   try {
-    const admins = await User.find({ role: 'institution_admin' })
-      .populate('institutionId', 'name domain email')
-      .select('-__v')
-      .sort({ createdAt: -1 });
+    const admins = await prisma.user.findMany({
+      where: { role: 'institution_admin' },
+      include: {
+        institution: {
+          select: { id: true, name: true, domain: true, email: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-    // Format data for export
     const exportData = admins.map(admin => ({
-      institution: admin.institutionId?.name || 'Not Assigned',
-      domain: admin.institutionId?.domain || 'N/A',
-      institutionEmail: admin.institutionId?.email || 'N/A',
-      adminFirstName: admin.fullname?.firstname || '',
-      adminLastName: admin.fullname?.lastname || '',
+      institution: admin.institution?.name || 'Not Assigned',
+      domain: admin.institution?.domain || 'N/A',
+      institutionEmail: admin.institution?.email || 'N/A',
+      adminFirstName: admin.firstname || '',
+      adminLastName: admin.lastname || '',
       username: admin.username,
       email: admin.email,
       passwordNote: 'HASHED - Cannot export. Generate temporary password.',
       createdAt: admin.createdAt,
       lastUpdated: admin.updatedAt,
-      institutionId: admin.institutionId?._id || null
+      institutionId: admin.institution?.id || null
     }));
 
     return res.status(200).json({
@@ -249,7 +283,6 @@ export const exportAllAdmins = async (req, res) => {
   }
 };
 
-// Change password (for first-time login)
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -262,21 +295,21 @@ export const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'New password must be at least 6 characters long' });
     }
 
-    const user = await User.findById(req.user._id);
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Verify current password
-    const match = await user.comparePassword(currentPassword);
+    const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
-    // Update password and set isFirstLogin to false
-    user.password = newPassword; // Will be hashed by pre-save hook
-    user.isFirstLogin = false;
-    await user.save();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword, isFirstLogin: false }
+    });
 
     return res.status(200).json({ 
       success: true,
@@ -287,4 +320,3 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
-

@@ -1,4 +1,4 @@
-import Institution from '../models/Institution.js';
+import { prisma } from '../config/db.js';
 
 // @desc    Create a new institution
 // @route   POST /api/institutions
@@ -16,7 +16,7 @@ export const createInstitution = async (req, res) => {
     }
 
     // Check if domain already exists
-    const existingInstitution = await Institution.findOne({ domain });
+    const existingInstitution = await prisma.institution.findUnique({ where: { domain } });
     if (existingInstitution) {
       return res.status(400).json({
         success: false,
@@ -25,12 +25,14 @@ export const createInstitution = async (req, res) => {
     }
 
     // Create new institution
-    const institution = await Institution.create({
-      name,
-      email,
-      address,
-      domain,
-      createdBy: req.user._id
+    const institution = await prisma.institution.create({
+      data: {
+        name,
+        email,
+        address,
+        domain,
+        createdById: req.user.id
+      }
     });
 
     res.status(201).json({
@@ -53,9 +55,14 @@ export const createInstitution = async (req, res) => {
 // @access  SuperAdmin only
 export const getAllInstitutions = async (req, res) => {
   try {
-    const institutions = await Institution.find()
-      .populate('createdBy', 'fullname email')
-      .sort({ createdAt: -1 });
+    const institutions = await prisma.institution.findMany({
+      include: {
+        createdBy: {
+          select: { firstname: true, lastname: true, email: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
     res.status(200).json({
       success: true,
@@ -77,8 +84,14 @@ export const getAllInstitutions = async (req, res) => {
 // @access  SuperAdmin only
 export const getInstitutionById = async (req, res) => {
   try {
-    const institution = await Institution.findById(req.params.id)
-      .populate('createdBy', 'fullname email');
+    const institution = await prisma.institution.findUnique({
+      where: { id: req.params.id },
+      include: {
+        createdBy: {
+          select: { firstname: true, lastname: true, email: true }
+        }
+      }
+    });
 
     if (!institution) {
       return res.status(404).json({
@@ -109,7 +122,7 @@ export const updateInstitution = async (req, res) => {
     const { name, email, address, domain } = req.body;
 
     // Check if institution exists
-    let institution = await Institution.findById(req.params.id);
+    const institution = await prisma.institution.findUnique({ where: { id: req.params.id } });
     if (!institution) {
       return res.status(404).json({
         success: false,
@@ -119,7 +132,7 @@ export const updateInstitution = async (req, res) => {
 
     // If domain is being updated, check if new domain already exists
     if (domain && domain !== institution.domain) {
-      const existingInstitution = await Institution.findOne({ domain });
+      const existingInstitution = await prisma.institution.findUnique({ where: { domain } });
       if (existingInstitution) {
         return res.status(400).json({
           success: false,
@@ -128,17 +141,22 @@ export const updateInstitution = async (req, res) => {
       }
     }
 
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (address) updateData.address = address;
+    if (domain) updateData.domain = domain;
+
     // Update institution
-    institution = await Institution.findByIdAndUpdate(
-      req.params.id,
-      { name, email, address, domain, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
+    const updatedInstitution = await prisma.institution.update({
+      where: { id: req.params.id },
+      data: updateData
+    });
 
     res.status(200).json({
       success: true,
       message: 'Institution updated successfully',
-      data: institution
+      data: updatedInstitution
     });
   } catch (error) {
     console.error('Error updating institution:', error);
@@ -155,7 +173,7 @@ export const updateInstitution = async (req, res) => {
 // @access  SuperAdmin only
 export const deleteInstitution = async (req, res) => {
   try {
-    const institution = await Institution.findById(req.params.id);
+    const institution = await prisma.institution.findUnique({ where: { id: req.params.id } });
 
     if (!institution) {
       return res.status(404).json({
@@ -164,7 +182,7 @@ export const deleteInstitution = async (req, res) => {
       });
     }
 
-    await Institution.findByIdAndDelete(req.params.id);
+    await prisma.institution.delete({ where: { id: req.params.id } });
 
     res.status(200).json({
       success: true,
@@ -197,8 +215,14 @@ export const getMyInstitution = async (req, res) => {
       });
     }
 
-    const institution = await Institution.findById(req.user.institutionId)
-      .populate('createdBy', 'fullname email');
+    const institution = await prisma.institution.findUnique({
+      where: { id: req.user.institutionId },
+      include: {
+        createdBy: {
+          select: { firstname: true, lastname: true, email: true }
+        }
+      }
+    });
 
     if (!institution) {
       return res.status(404).json({

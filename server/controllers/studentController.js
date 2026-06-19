@@ -1,5 +1,4 @@
-import Student from '../models/Student.js';
-import Course from '../models/Course.js';
+import { prisma } from '../config/db.js';
 
 // @desc    Create a new student
 // @route   POST /api/students
@@ -17,7 +16,7 @@ export const createStudent = async (req, res) => {
     }
 
     // Check if student email already exists
-    const existingStudent = await Student.findOne({ email });
+    const existingStudent = await prisma.student.findUnique({ where: { email } });
     if (existingStudent) {
       return res.status(400).json({
         success: false,
@@ -27,7 +26,7 @@ export const createStudent = async (req, res) => {
 
     // If courses are provided, verify they belong to the same institution
     if (enrolledCourses && enrolledCourses.length > 0) {
-      const courses = await Course.find({ _id: { $in: enrolledCourses } });
+      const courses = await prisma.course.findMany({ where: { id: { in: enrolledCourses } } });
       
       if (courses.length !== enrolledCourses.length) {
         return res.status(404).json({
@@ -37,7 +36,7 @@ export const createStudent = async (req, res) => {
       }
 
       const invalidCourse = courses.find(
-        course => course.institutionId.toString() !== req.user.institutionId.toString()
+        course => course.institutionId !== req.user.institutionId
       );
 
       if (invalidCourse) {
@@ -49,20 +48,31 @@ export const createStudent = async (req, res) => {
     }
 
     // Create new student
-    const student = await Student.create({
+    const studentData = {
       name,
       email,
-      enrolledCourses: enrolledCourses || [],
       institutionId: req.user.institutionId
-    });
+    };
 
-    const populatedStudent = await Student.findById(student._id)
-      .populate('enrolledCourses', 'title description');
+    if (enrolledCourses && enrolledCourses.length > 0) {
+      studentData.enrolledCourses = {
+        connect: enrolledCourses.map(id => ({ id }))
+      };
+    }
+
+    const student = await prisma.student.create({
+      data: studentData,
+      include: {
+        enrolledCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(201).json({
       success: true,
       message: 'Student created successfully',
-      data: populatedStudent
+      data: student
     });
   } catch (error) {
     console.error('Error creating student:', error);
@@ -79,9 +89,19 @@ export const createStudent = async (req, res) => {
 // @access  Institution Admin only
 export const getStudents = async (req, res) => {
   try {
-    const students = await Student.find({ institutionId: req.user.institutionId })
-      .populate('enrolledCourses', 'title description teacher')
-      .sort({ createdAt: -1 });
+    const students = await prisma.student.findMany({
+      where: { institutionId: req.user.institutionId },
+      include: {
+        enrolledCourses: {
+          select: { 
+            title: true, 
+            description: true, 
+            teacher: { select: { name: true } } 
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
     res.status(200).json({
       success: true,
@@ -103,8 +123,19 @@ export const getStudents = async (req, res) => {
 // @access  Institution Admin only
 export const getStudentById = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id)
-      .populate('enrolledCourses', 'title description teacher');
+    const student = await prisma.student.findUnique({
+      where: { id: req.params.id },
+      include: {
+        enrolledCourses: {
+          select: { 
+            id: true,
+            title: true, 
+            description: true, 
+            teacher: { select: { name: true } } 
+          }
+        }
+      }
+    });
 
     if (!student) {
       return res.status(404).json({
@@ -114,7 +145,7 @@ export const getStudentById = async (req, res) => {
     }
 
     // Verify student belongs to admin's institution
-    if (student.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (student.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -142,7 +173,7 @@ export const updateStudent = async (req, res) => {
   try {
     const { name, email, enrolledCourses } = req.body;
 
-    const student = await Student.findById(req.params.id);
+    const student = await prisma.student.findUnique({ where: { id: req.params.id } });
 
     if (!student) {
       return res.status(404).json({
@@ -152,7 +183,7 @@ export const updateStudent = async (req, res) => {
     }
 
     // Verify student belongs to admin's institution
-    if (student.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (student.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -161,7 +192,7 @@ export const updateStudent = async (req, res) => {
 
     // If email is being changed, check for uniqueness
     if (email && email !== student.email) {
-      const existingStudent = await Student.findOne({ email });
+      const existingStudent = await prisma.student.findUnique({ where: { email } });
       if (existingStudent) {
         return res.status(400).json({
           success: false,
@@ -172,7 +203,7 @@ export const updateStudent = async (req, res) => {
 
     // If courses are being updated, verify they belong to the same institution
     if (enrolledCourses !== undefined) {
-      const courses = await Course.find({ _id: { $in: enrolledCourses } });
+      const courses = await prisma.course.findMany({ where: { id: { in: enrolledCourses } } });
       
       if (courses.length !== enrolledCourses.length) {
         return res.status(404).json({
@@ -182,7 +213,7 @@ export const updateStudent = async (req, res) => {
       }
 
       const invalidCourse = courses.find(
-        course => course.institutionId.toString() !== req.user.institutionId.toString()
+        course => course.institutionId !== req.user.institutionId
       );
 
       if (invalidCourse) {
@@ -193,15 +224,24 @@ export const updateStudent = async (req, res) => {
       }
     }
 
-    // Update student fields
-    if (name) student.name = name;
-    if (email) student.email = email;
-    if (enrolledCourses !== undefined) student.enrolledCourses = enrolledCourses;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (enrolledCourses !== undefined) {
+      updateData.enrolledCourses = {
+        set: enrolledCourses.map(id => ({ id }))
+      };
+    }
 
-    await student.save();
-
-    const updatedStudent = await Student.findById(student._id)
-      .populate('enrolledCourses', 'title description');
+    const updatedStudent = await prisma.student.update({
+      where: { id: req.params.id },
+      data: updateData,
+      include: {
+        enrolledCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,
@@ -223,7 +263,7 @@ export const updateStudent = async (req, res) => {
 // @access  Institution Admin only
 export const deleteStudent = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await prisma.student.findUnique({ where: { id: req.params.id } });
 
     if (!student) {
       return res.status(404).json({
@@ -233,14 +273,14 @@ export const deleteStudent = async (req, res) => {
     }
 
     // Verify student belongs to admin's institution
-    if (student.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (student.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
       });
     }
 
-    await student.deleteOne();
+    await prisma.student.delete({ where: { id: req.params.id } });
 
     res.status(200).json({
       success: true,
@@ -270,7 +310,10 @@ export const enrollStudentInCourse = async (req, res) => {
       });
     }
 
-    const student = await Student.findById(req.params.id);
+    const student = await prisma.student.findUnique({
+      where: { id: req.params.id },
+      include: { enrolledCourses: true }
+    });
 
     if (!student) {
       return res.status(404).json({
@@ -280,7 +323,7 @@ export const enrollStudentInCourse = async (req, res) => {
     }
 
     // Verify student belongs to admin's institution
-    if (student.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (student.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -288,7 +331,7 @@ export const enrollStudentInCourse = async (req, res) => {
     }
 
     // Verify course exists and belongs to the same institution
-    const course = await Course.findById(courseId);
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -296,7 +339,7 @@ export const enrollStudentInCourse = async (req, res) => {
       });
     }
 
-    if (course.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (course.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Course does not belong to your institution'
@@ -304,19 +347,26 @@ export const enrollStudentInCourse = async (req, res) => {
     }
 
     // Check if already enrolled
-    if (student.enrolledCourses.includes(courseId)) {
+    if (student.enrolledCourses.some(c => c.id === courseId)) {
       return res.status(400).json({
         success: false,
         message: 'Student is already enrolled in this course'
       });
     }
 
-    // Add course to student's enrolledCourses
-    student.enrolledCourses.push(courseId);
-    await student.save();
-
-    const updatedStudent = await Student.findById(student._id)
-      .populate('enrolledCourses', 'title description');
+    const updatedStudent = await prisma.student.update({
+      where: { id: req.params.id },
+      data: {
+        enrolledCourses: {
+          connect: { id: courseId }
+        }
+      },
+      include: {
+        enrolledCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,
@@ -347,7 +397,7 @@ export const unenrollStudentFromCourse = async (req, res) => {
       });
     }
 
-    const student = await Student.findById(req.params.id);
+    const student = await prisma.student.findUnique({ where: { id: req.params.id } });
 
     if (!student) {
       return res.status(404).json({
@@ -357,21 +407,26 @@ export const unenrollStudentFromCourse = async (req, res) => {
     }
 
     // Verify student belongs to admin's institution
-    if (student.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (student.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
       });
     }
 
-    // Remove course from student's enrolledCourses
-    student.enrolledCourses = student.enrolledCourses.filter(
-      course => course.toString() !== courseId
-    );
-    await student.save();
-
-    const updatedStudent = await Student.findById(student._id)
-      .populate('enrolledCourses', 'title description');
+    const updatedStudent = await prisma.student.update({
+      where: { id: req.params.id },
+      data: {
+        enrolledCourses: {
+          disconnect: { id: courseId }
+        }
+      },
+      include: {
+        enrolledCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,

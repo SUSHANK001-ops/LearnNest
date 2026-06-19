@@ -1,5 +1,4 @@
-import Teacher from '../models/Teacher.js';
-import Course from '../models/Course.js';
+import { prisma } from '../config/db.js';
 
 // @desc    Create a new teacher
 // @route   POST /api/teachers
@@ -17,7 +16,7 @@ export const createTeacher = async (req, res) => {
     }
 
     // Check if teacher email already exists
-    const existingTeacher = await Teacher.findOne({ email });
+    const existingTeacher = await prisma.teacher.findUnique({ where: { email } });
     if (existingTeacher) {
       return res.status(400).json({
         success: false,
@@ -27,7 +26,7 @@ export const createTeacher = async (req, res) => {
 
     // If courses are provided, verify they belong to the same institution
     if (assignedCourses && assignedCourses.length > 0) {
-      const courses = await Course.find({ _id: { $in: assignedCourses } });
+      const courses = await prisma.course.findMany({ where: { id: { in: assignedCourses } } });
       
       if (courses.length !== assignedCourses.length) {
         return res.status(404).json({
@@ -37,7 +36,7 @@ export const createTeacher = async (req, res) => {
       }
 
       const invalidCourse = courses.find(
-        course => course.institutionId.toString() !== req.user.institutionId.toString()
+        course => course.institutionId !== req.user.institutionId
       );
 
       if (invalidCourse) {
@@ -48,29 +47,32 @@ export const createTeacher = async (req, res) => {
       }
     }
 
-    // Create new teacher
-    const teacher = await Teacher.create({
+    const teacherData = {
       name,
       email,
-      assignedCourses: assignedCourses || [],
       institutionId: req.user.institutionId
-    });
+    };
 
-    // Update courses with the new teacher
     if (assignedCourses && assignedCourses.length > 0) {
-      await Course.updateMany(
-        { _id: { $in: assignedCourses } },
-        { teacher: teacher._id }
-      );
+      teacherData.assignedCourses = {
+        connect: assignedCourses.map(id => ({ id }))
+      };
     }
 
-    const populatedTeacher = await Teacher.findById(teacher._id)
-      .populate('assignedCourses', 'title description');
+    // Create new teacher
+    const teacher = await prisma.teacher.create({
+      data: teacherData,
+      include: {
+        assignedCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(201).json({
       success: true,
       message: 'Teacher created successfully',
-      data: populatedTeacher
+      data: teacher
     });
   } catch (error) {
     console.error('Error creating teacher:', error);
@@ -87,9 +89,15 @@ export const createTeacher = async (req, res) => {
 // @access  Institution Admin only
 export const getTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find({ institutionId: req.user.institutionId })
-      .populate('assignedCourses', 'title description')
-      .sort({ createdAt: -1 });
+    const teachers = await prisma.teacher.findMany({
+      where: { institutionId: req.user.institutionId },
+      include: {
+        assignedCourses: {
+          select: { title: true, description: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
     res.status(200).json({
       success: true,
@@ -111,8 +119,14 @@ export const getTeachers = async (req, res) => {
 // @access  Institution Admin only
 export const getTeacherById = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id)
-      .populate('assignedCourses', 'title description');
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: req.params.id },
+      include: {
+        assignedCourses: {
+          select: { id: true, title: true, description: true }
+        }
+      }
+    });
 
     if (!teacher) {
       return res.status(404).json({
@@ -122,7 +136,7 @@ export const getTeacherById = async (req, res) => {
     }
 
     // Verify teacher belongs to admin's institution
-    if (teacher.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (teacher.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -150,7 +164,7 @@ export const updateTeacher = async (req, res) => {
   try {
     const { name, email } = req.body;
 
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await prisma.teacher.findUnique({ where: { id: req.params.id } });
 
     if (!teacher) {
       return res.status(404).json({
@@ -160,7 +174,7 @@ export const updateTeacher = async (req, res) => {
     }
 
     // Verify teacher belongs to admin's institution
-    if (teacher.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (teacher.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -169,7 +183,7 @@ export const updateTeacher = async (req, res) => {
 
     // If email is being changed, check for uniqueness
     if (email && email !== teacher.email) {
-      const existingTeacher = await Teacher.findOne({ email });
+      const existingTeacher = await prisma.teacher.findUnique({ where: { email } });
       if (existingTeacher) {
         return res.status(400).json({
           success: false,
@@ -178,14 +192,19 @@ export const updateTeacher = async (req, res) => {
       }
     }
 
-    // Update teacher fields
-    if (name) teacher.name = name;
-    if (email) teacher.email = email;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
 
-    await teacher.save();
-
-    const updatedTeacher = await Teacher.findById(teacher._id)
-      .populate('assignedCourses', 'title description');
+    const updatedTeacher = await prisma.teacher.update({
+      where: { id: req.params.id },
+      data: updateData,
+      include: {
+        assignedCourses: {
+          select: { title: true, description: true }
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,
@@ -207,7 +226,7 @@ export const updateTeacher = async (req, res) => {
 // @access  Institution Admin only
 export const deleteTeacher = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await prisma.teacher.findUnique({ where: { id: req.params.id } });
 
     if (!teacher) {
       return res.status(404).json({
@@ -217,7 +236,7 @@ export const deleteTeacher = async (req, res) => {
     }
 
     // Verify teacher belongs to admin's institution
-    if (teacher.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (teacher.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -225,12 +244,12 @@ export const deleteTeacher = async (req, res) => {
     }
 
     // Remove teacher from all assigned courses
-    await Course.updateMany(
-      { teacher: teacher._id },
-      { teacher: null }
-    );
+    await prisma.course.updateMany({
+      where: { teacherId: req.params.id },
+      data: { teacherId: null }
+    });
 
-    await teacher.deleteOne();
+    await prisma.teacher.delete({ where: { id: req.params.id } });
 
     res.status(200).json({
       success: true,
@@ -260,7 +279,10 @@ export const assignTeacherToCourse = async (req, res) => {
       });
     }
 
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: req.params.id },
+      include: { assignedCourses: true }
+    });
 
     if (!teacher) {
       return res.status(404).json({
@@ -270,7 +292,7 @@ export const assignTeacherToCourse = async (req, res) => {
     }
 
     // Verify teacher belongs to admin's institution
-    if (teacher.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (teacher.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -278,7 +300,7 @@ export const assignTeacherToCourse = async (req, res) => {
     }
 
     // Verify course exists and belongs to the same institution
-    const course = await Course.findById(courseId);
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -286,7 +308,7 @@ export const assignTeacherToCourse = async (req, res) => {
       });
     }
 
-    if (course.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (course.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Course does not belong to your institution'
@@ -294,31 +316,25 @@ export const assignTeacherToCourse = async (req, res) => {
     }
 
     // Check if already assigned
-    if (teacher.assignedCourses.includes(courseId)) {
+    if (course.teacherId === teacher.id) {
       return res.status(400).json({
         success: false,
         message: 'Teacher is already assigned to this course'
       });
     }
 
-    // If course has another teacher, remove the course from that teacher
-    if (course.teacher && course.teacher.toString() !== teacher._id.toString()) {
-      await Teacher.findByIdAndUpdate(
-        course.teacher,
-        { $pull: { assignedCourses: courseId } }
-      );
-    }
+    // Assigning the course to the teacher
+    await prisma.course.update({
+      where: { id: courseId },
+      data: { teacherId: teacher.id }
+    });
 
-    // Add course to teacher's assignedCourses
-    teacher.assignedCourses.push(courseId);
-    await teacher.save();
-
-    // Update course with the teacher
-    course.teacher = teacher._id;
-    await course.save();
-
-    const updatedTeacher = await Teacher.findById(teacher._id)
-      .populate('assignedCourses', 'title description');
+    const updatedTeacher = await prisma.teacher.findUnique({
+      where: { id: req.params.id },
+      include: {
+        assignedCourses: { select: { title: true, description: true } }
+      }
+    });
 
     res.status(200).json({
       success: true,
@@ -349,7 +365,7 @@ export const unassignTeacherFromCourse = async (req, res) => {
       });
     }
 
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await prisma.teacher.findUnique({ where: { id: req.params.id } });
 
     if (!teacher) {
       return res.status(404).json({
@@ -359,24 +375,25 @@ export const unassignTeacherFromCourse = async (req, res) => {
     }
 
     // Verify teacher belongs to admin's institution
-    if (teacher.institutionId.toString() !== req.user.institutionId.toString()) {
+    if (teacher.institutionId !== req.user.institutionId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
       });
     }
 
-    // Remove course from teacher's assignedCourses
-    teacher.assignedCourses = teacher.assignedCourses.filter(
-      course => course.toString() !== courseId
-    );
-    await teacher.save();
+    // Unassign course from teacher
+    await prisma.course.update({
+      where: { id: courseId },
+      data: { teacherId: null }
+    });
 
-    // Update course to remove teacher
-    await Course.findByIdAndUpdate(courseId, { teacher: null });
-
-    const updatedTeacher = await Teacher.findById(teacher._id)
-      .populate('assignedCourses', 'title description');
+    const updatedTeacher = await prisma.teacher.findUnique({
+      where: { id: req.params.id },
+      include: {
+        assignedCourses: { select: { title: true, description: true } }
+      }
+    });
 
     res.status(200).json({
       success: true,

@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String       @id @default(uuid())
+  firstname        String
+  lastname         String       @default("")
+  username         String
+  email            String       @unique
+  password         String
+  institutionId    String?
+  institution      Institution? @relation("InstitutionUsers", fields: [institutionId], references: [id])
+  role             String       @default("institution_admin")
+  isFirstLogin     Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  createdInstitutions Institution[] @relation("InstitutionCreator")
+  createdCourses      Course[]      @relation("CourseCreator")
+}
+
+model Institution {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  address     String
+  domain      String   @unique
+  createdById String
+  createdBy   User     @relation("InstitutionCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users    User[]    @relation("InstitutionUsers")
+  courses  Course[]
+  students Student[]
+  teachers Teacher[]
+}
+
+model Course {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  teacherId     String?
+  teacher       Teacher? @relation("TeacherCourses", fields: [teacherId], references: [id])
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  createdById   String
+  createdBy     User     @relation("CourseCreator", fields: [createdById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  students Student[] @relation("StudentCourses")
+}
+
+model Student {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  enrolledCourses Course[] @relation("StudentCourses")
+}
+
+model Teacher {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assignedCourses Course[] @relation("TeacherCourses")
+}
