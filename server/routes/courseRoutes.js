@@ -11,15 +11,15 @@ import {
 import { checkRole } from '../middleware/roleMiddleware.js';
 import { verifyToken, requireAuth } from '../middleware/auth.js';
 
-// All routes require authentication and institution_admin role
+// All routes require authentication
 router.use(verifyToken);
 router.use(requireAuth);
-router.use(checkRole(['institution_admin']));
 
-router.post('/', createCourse);
-router.get('/', getCourses);
-router.get('/:id', getCourseById);
-router.put('/:id', updateCourse);
-router.delete('/:id', deleteCourse);
+// Admin and teacher can manage courses
+router.post('/', checkRole(['institution_admin', 'teacher']), createCourse);
+router.get('/', checkRole(['institution_admin', 'teacher', 'student']), getCourses);
+router.get('/:id', checkRole(['institution_admin', 'teacher', 'student']), getCourseById);
+router.put('/:id', checkRole(['institution_admin', 'teacher']), updateCourse);
+router.delete('/:id', checkRole(['institution_admin']), deleteCourse);
 
 export default router;
