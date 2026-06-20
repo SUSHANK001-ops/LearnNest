@@ -173,7 +173,8 @@ export const updateInstitution = async (req, res) => {
 // @access  SuperAdmin only
 export const deleteInstitution = async (req, res) => {
   try {
-    const institution = await prisma.institution.findUnique({ where: { id: req.params.id } });
+    const institutionId = req.params.id;
+    const institution = await prisma.institution.findUnique({ where: { id: institutionId } });
 
     if (!institution) {
       return res.status(404).json({
@@ -182,7 +183,15 @@ export const deleteInstitution = async (req, res) => {
       });
     }
 
-    await prisma.institution.delete({ where: { id: req.params.id } });
+    // Delete the institution and all related records in a transaction
+    // to prevent foreign key constraint errors.
+    await prisma.$transaction([
+      prisma.course.deleteMany({ where: { institutionId } }),
+      prisma.student.deleteMany({ where: { institutionId } }),
+      prisma.teacher.deleteMany({ where: { institutionId } }),
+      prisma.user.deleteMany({ where: { institutionId } }),
+      prisma.institution.delete({ where: { id: institutionId } })
+    ]);
 
     res.status(200).json({
       success: true,

@@ -41,9 +41,9 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 
-// Body parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parser - increased limit for file uploads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Compression middleware
 app.use(compression());
@@ -61,23 +61,38 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Import routes
 import authRoutes from './Admins/Routes/auth.js';
 import institutionRoutes from './routes/institutionRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import teacherRoutes from './routes/teacherRoutes.js';
+import folderRoutes from './routes/folderRoutes.js';
+import fileRoutes from './routes/fileRoutes.js';
+import videoRoutes from './routes/videoRoutes.js';
+import quizRoutes from './routes/quizRoutes.js';
+import bulkImportRoutes from './routes/bulkImportRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
-// Mount auth routes
+// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/institutions', institutionRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/folders', folderRoutes);
+app.use('/api/files', fileRoutes);
+app.use('/api/videos', videoRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/bulk-import', bulkImportRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get("/", (req, res) => {
   res.json({ 
     message: "LearnNest LMS API", 
-    version: "1.0.0",
+    version: "2.0.0",
     environment: process.env.NODE_ENV || 'development'
   });
 });
@@ -131,6 +146,7 @@ app.use((req, res) => {
             email: superEmail,
             password: hashedPassword,
             role: 'superadmin',
+            isFirstLogin: false,
           }
         });
         console.log('Default SuperAdmin created:', superEmail);

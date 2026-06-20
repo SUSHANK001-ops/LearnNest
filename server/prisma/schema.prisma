@@ -15,15 +15,31 @@ model User {
   username         String
   email            String       @unique
   password         String
+  phone            String?
+  department       String?
+  designation      String?
+  semester         String?
+  studentIdCode    String?      // Custom student ID like ST001
+  employeeIdCode   String?      // Custom employee ID like T001
   institutionId    String?
   institution      Institution? @relation("InstitutionUsers", fields: [institutionId], references: [id])
-  role             String       @default("institution_admin")
+  role             String       @default("institution_admin") // superadmin, institution_admin, teacher, student
   isFirstLogin     Boolean      @default(true)
+  isActive         Boolean      @default(true)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
   createdInstitutions Institution[] @relation("InstitutionCreator")
   createdCourses      Course[]      @relation("CourseCreator")
+  uploadedFiles       File[]        @relation("FileUploader")
+  uploadedVideos      Video[]       @relation("VideoUploader")
+  createdQuizzes      Quiz[]        @relation("QuizCreator")
+  notifications       Notification[] @relation("NotificationRecipient")
+  auditLogs           AuditLog[]    @relation("AuditUser")
+
+  // Link to Teacher/Student profile
+  teacherProfile   Teacher? @relation("TeacherUser")
+  studentProfile   Student? @relation("StudentUser")
 }
 
 model Institution {
@@ -41,11 +57,13 @@ model Institution {
   courses  Course[]
   students Student[]
   teachers Teacher[]
+  notifications Notification[] @relation("InstitutionNotifications")
 }
 
 model Course {
   id            String   @id @default(uuid())
   title         String
+  code          String?  // Course code like CS101
   description   String
   teacherId     String?
   teacher       Teacher? @relation("TeacherCourses", fields: [teacherId], references: [id])
@@ -53,32 +71,193 @@ model Course {
   institution   Institution @relation(fields: [institutionId], references: [id])
   createdById   String
   createdBy     User     @relation("CourseCreator", fields: [createdById], references: [id])
+  isArchived    Boolean  @default(false)
+  status        String   @default("active") // active, archived, draft
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   students Student[] @relation("StudentCourses")
+  folders  Folder[]
+  files    File[]
+  videos   Video[]
+  quizzes  Quiz[]
+  notifications Notification[] @relation("CourseNotifications")
 }
 
 model Student {
   id            String   @id @default(uuid())
   name          String
   email         String   @unique
+  phone         String?
+  department    String?
+  semester      String?
+  studentIdCode String?  // Custom ID like ST001
   institutionId String
   institution   Institution @relation(fields: [institutionId], references: [id])
+  userId        String?  @unique // Link to User for auth
+  user          User?    @relation("StudentUser", fields: [userId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  enrolledCourses Course[] @relation("StudentCourses")
+  enrolledCourses Course[]      @relation("StudentCourses")
+  quizAttempts    QuizAttempt[]
 }
 
 model Teacher {
   id            String   @id @default(uuid())
   name          String
   email         String   @unique
+  phone         String?
+  department    String?
+  designation   String?
+  employeeIdCode String? // Custom ID like T001
   institutionId String
   institution   Institution @relation(fields: [institutionId], references: [id])
+  userId        String?  @unique // Link to User for auth
+  user          User?    @relation("TeacherUser", fields: [userId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   assignedCourses Course[] @relation("TeacherCourses")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  courseId   String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  parentId  String?  // Self-referencing for nested folders
+  parent    Folder?  @relation("FolderChildren", fields: [parentId], references: [id])
+  children  Folder[] @relation("FolderChildren")
+  files     File[]
+  videos    Video[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id             String   @id @default(uuid())
+  name           String
+  originalName   String
+  mimeType       String
+  size           Int      // in bytes
+  storageProvider String  // cloudinary, s3, gcp
+  storageUrl     String
+  storagePublicId String
+  folderId       String?
+  folder         Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  courseId        String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  uploadedById   String
+  uploadedBy     User     @relation("FileUploader", fields: [uploadedById], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Video {
+  id             String   @id @default(uuid())
+  title          String
+  type           String   // upload, youtube
+  youtubeUrl     String?
+  storageUrl     String?
+  storagePublicId String?
+  duration       Int?     // in seconds
+  folderId       String?
+  folder         Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  courseId        String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  uploadedById   String
+  uploadedBy     User     @relation("VideoUploader", fields: [uploadedById], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Quiz {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  courseId       String
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdById   String
+  createdBy     User      @relation("QuizCreator", fields: [createdById], references: [id])
+  duration      Int?      // in minutes
+  totalMarks    Int       @default(0)
+  passingMarks  Int       @default(0)
+  isPublished   Boolean   @default(false)
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  questions    Question[]
+  attempts     QuizAttempt[]
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String   // A, B, C, or D
+  marks         Int      @default(1)
+  difficulty    String   @default("medium") // easy, medium, hard
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  answers QuizAnswer[]
+}
+
+model QuizAttempt {
+  id          String    @id @default(uuid())
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  score       Int       @default(0)
+  totalMarks  Int       @default(0)
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  status      String    @default("in_progress") // in_progress, submitted, graded
+
+  answers QuizAnswer[]
+}
+
+model QuizAnswer {
+  id             String   @id @default(uuid())
+  attemptId      String
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswer String?  // A, B, C, D, or null if unanswered
+  isCorrect      Boolean  @default(false)
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  title         String
+  message       String
+  type          String   // assignment, content, quiz, announcement
+  recipientId   String
+  recipient     User     @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  institutionId String?
+  institution   Institution? @relation("InstitutionNotifications", fields: [institutionId], references: [id])
+  courseId       String?
+  course        Course?  @relation("CourseNotifications", fields: [courseId], references: [id])
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation("AuditUser", fields: [userId], references: [id])
+  action     String   // create, update, delete, login, upload, etc.
+  entityType String   // user, course, quiz, file, etc.
+  entityId   String?
+  metadata   String?  // JSON string with additional details
+  createdAt  DateTime @default(now())
 }

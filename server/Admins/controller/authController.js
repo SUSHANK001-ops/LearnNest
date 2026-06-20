@@ -65,20 +65,222 @@ export const login = async (req, res) => {
     
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    // Check if account is active
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Account is deactivated. Contact your administrator.' });
+    }
     
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-    return res.json({ 
-      token, 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        username: user.username, 
-        role: user.role,
-        isFirstLogin: user.isFirstLogin 
-      } 
+
+    // Build user response based on role
+    const userResponse = { 
+      id: user.id, 
+      email: user.email, 
+      username: user.username, 
+      firstname: user.firstname,
+      lastname: user.lastname,
+      role: user.role,
+      isFirstLogin: user.isFirstLogin,
+      institutionId: user.institutionId
+    };
+
+    // If teacher or student, include profile info
+    if (user.role === 'teacher') {
+      const teacher = await prisma.teacher.findUnique({ where: { userId: user.id } });
+      if (teacher) userResponse.teacherId = teacher.id;
+    } else if (user.role === 'student') {
+      const student = await prisma.student.findUnique({ where: { userId: user.id } });
+      if (student) userResponse.studentId = student.id;
+    }
+
+    return res.json({ token, user: userResponse });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Create teacher with user account
+// @route   POST /api/auth/create-teacher
+// @access  Institution Admin
+export const createTeacherWithAccount = async (req, res) => {
+  try {
+    const { name, email, phone, department, designation, employeeId, password } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
+
+    const tempPassword = password || 'TempPass@123';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const username = email.split('@')[0] + '_' + Date.now().toString(36);
+      const user = await tx.user.create({
+        data: {
+          firstname: name.split(' ')[0],
+          lastname: name.split(' ').slice(1).join(' ') || '',
+          username,
+          email,
+          password: hashedPassword,
+          phone: phone || null,
+          department: department || null,
+          designation: designation || null,
+          employeeIdCode: employeeId || null,
+          role: 'teacher',
+          institutionId: req.user.institutionId,
+          isFirstLogin: true
+        }
+      });
+
+      const teacher = await tx.teacher.create({
+        data: {
+          name,
+          email,
+          phone: phone || null,
+          department: department || null,
+          designation: designation || null,
+          employeeIdCode: employeeId || null,
+          institutionId: req.user.institutionId,
+          userId: user.id
+        }
+      });
+
+      return { user, teacher };
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Teacher created with login account',
+      data: {
+        teacherId: result.teacher.id,
+        userId: result.user.id,
+        email,
+        tempPassword
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2002') return res.status(400).json({ message: 'Email already exists' });
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Create student with user account
+// @route   POST /api/auth/create-student
+// @access  Institution Admin
+export const createStudentWithAccount = async (req, res) => {
+  try {
+    const { name, email, phone, department, semester, studentId, password } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
+
+    const tempPassword = password || 'TempPass@123';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const username = email.split('@')[0] + '_' + Date.now().toString(36);
+      const user = await tx.user.create({
+        data: {
+          firstname: name.split(' ')[0],
+          lastname: name.split(' ').slice(1).join(' ') || '',
+          username,
+          email,
+          password: hashedPassword,
+          phone: phone || null,
+          department: department || null,
+          semester: semester || null,
+          studentIdCode: studentId || null,
+          role: 'student',
+          institutionId: req.user.institutionId,
+          isFirstLogin: true
+        }
+      });
+
+      const student = await tx.student.create({
+        data: {
+          name,
+          email,
+          phone: phone || null,
+          department: department || null,
+          semester: semester || null,
+          studentIdCode: studentId || null,
+          institutionId: req.user.institutionId,
+          userId: user.id
+        }
+      });
+
+      return { user, student };
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Student created with login account',
+      data: {
+        studentId: result.student.id,
+        userId: result.user.id,
+        email,
+        tempPassword
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'P2002') return res.status(400).json({ message: 'Email already exists' });
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Toggle user active status
+// @route   PATCH /api/auth/toggle-status/:id
+// @access  Institution Admin, SuperAdmin
+export const toggleUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await prisma.user.update({
+      where: { id },
+      data: { isActive: !user.isActive }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Account ${user.isActive ? 'deactivated' : 'activated'} successfully`
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Reset user password (admin resets for user)
+// @route   POST /api/auth/reset-password/:id
+// @access  Institution Admin, SuperAdmin
+export const resetUserPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tempPassword = 'TempPass@123';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword, isFirstLogin: true }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset successfully',
+      tempPassword
     });
   } catch (err) {
     console.error(err);
