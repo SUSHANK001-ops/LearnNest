@@ -3,11 +3,92 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Professional LearnNest Color Palette */
+  /* Primary: Deep Teal — authoritative, calming, academic */
+  --color-brand-50: #eef8f6;
+  --color-brand-100: #d5ede9;
+  --color-brand-200: #aedbd4;
+  --color-brand-300: #7ec3b8;
+  --color-brand-400: #52a899;
+  --color-brand-500: #378f80;
+  --color-brand-600: #2b7367;
+  --color-brand-700: #265c54;
+  --color-brand-800: #224a44;
+  --color-brand-900: #1e3e39;
+  --color-brand-950: #0d2421;
+
+  /* Accent: Burnished Amber — warmth, action, attention */
+  --color-accent-50: #fdf8ef;
+  --color-accent-100: #faecd3;
+  --color-accent-200: #f4d5a5;
+  --color-accent-300: #edb96d;
+  --color-accent-400: #e69d3e;
+  --color-accent-500: #de8522;
+  --color-accent-600: #c46a18;
+  --color-accent-700: #a34f16;
+  --color-accent-800: #853f19;
+  --color-accent-900: #6e3518;
+
+  /* Surface: Warm Slate — softer than pure gray, approachable */
+  --color-surface-50: #f8f7f6;
+  --color-surface-100: #f0eeed;
+  --color-surface-200: #e2dfdc;
+  --color-surface-300: #cec9c4;
+  --color-surface-400: #b0a89f;
+  --color-surface-500: #9a9087;
+  --color-surface-600: #847a71;
+  --color-surface-700: #6d645d;
+  --color-surface-800: #5b544e;
+  --color-surface-900: #4d4843;
+  --color-surface-950: #292623;
 }
 
-/* Only essential overrides that Tailwind can't do */
-* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Base overrides */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar — warm slate tones */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #64748b; }
+::-webkit-scrollbar-thumb { background: var(--color-surface-300); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-surface-500); }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
+.animate-slide-up { animation: slideUp 0.5s ease-out both; }
+.animate-scale-in { animation: scaleIn 0.3s ease-out both; }
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--color-surface-100) 25%, var(--color-surface-200) 50%, var(--color-surface-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Stagger children for list animations */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }

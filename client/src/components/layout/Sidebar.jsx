@@ -10,7 +10,7 @@ const roleMenus = {
   superadmin: [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/superadmin/dashboard' },
     { id: 'manage-admins', label: 'Manage Admins', icon: Users, path: '/superadmin/manage-admins' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/superadmin/analytics' },
+    { id: 'create-admin', label: 'Create Admin', icon: Building2, path: '/superadmin/create-admin' },
   ],
   institution_admin: [
     { id: 'overview', label: 'Overview', icon: Home, path: '/admin/dashboard' },
@@ -24,9 +24,8 @@ const roleMenus = {
   teacher: [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/teacher/dashboard' },
     { id: 'courses', label: 'My Courses', icon: BookOpen, path: '/teacher/courses' },
-    { id: 'quizzes', label: 'Quizzes', icon: ClipboardList, path: '/teacher/quizzes' },
-    { id: 'files', label: 'Files', icon: FileText, path: '/teacher/files' },
-    { id: 'videos', label: 'Videos', icon: Video, path: '/teacher/videos' },
+    { id: 'quizzes', label: 'Quiz Builder', icon: ClipboardList, path: '/teacher/quizzes' },
+    { id: 'results', label: 'Results', icon: BarChart3, path: '/teacher/results' },
   ],
   student: [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/student/dashboard' },
@@ -60,7 +59,7 @@ const Sidebar = ({ role, collapsed, onToggle }) => {
       <aside
         className={`
           fixed top-0 left-0 z-50 h-screen flex flex-col
-          bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950
+          bg-gradient-to-b from-brand-950 via-brand-900 to-brand-950
           border-r border-white/5 shadow-2xl
           transition-all duration-300 ease-in-out
           ${collapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'translate-x-0 w-72'}
@@ -68,13 +67,13 @@ const Sidebar = ({ role, collapsed, onToggle }) => {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/25">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
               <h1 className="text-lg font-bold text-white tracking-tight">LearnNest</h1>
-              <p className="text-[11px] text-indigo-300/70 capitalize">{role?.replace('_', ' ')}</p>
+              <p className="text-[11px] text-brand-300/70 capitalize">{role?.replace('_', ' ')}</p>
             </div>
           )}
         </div>
@@ -83,7 +82,8 @@ const Sidebar = ({ role, collapsed, onToggle }) => {
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path ||
+              (item.path !== '/' && location.pathname.startsWith(item.path + '/'));
             return (
               <button
                 key={item.id}
@@ -92,19 +92,19 @@ const Sidebar = ({ role, collapsed, onToggle }) => {
                   w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                   transition-all duration-200 group relative
                   ${isActive
-                    ? 'bg-indigo-500/20 text-white shadow-lg shadow-indigo-500/10'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-brand-500/20 text-white shadow-lg shadow-brand-500/10'
+                    : 'text-brand-300/70 hover:text-white hover:bg-white/5'
                   }
                   ${collapsed ? 'justify-center' : ''}
                 `}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-400 rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand-400 rounded-r-full" />
                 )}
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-indigo-400'} transition-colors`} />
+                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-brand-400' : 'text-brand-500/60 group-hover:text-brand-400'} transition-colors`} />
                 {!collapsed && <span>{item.label}</span>}
                 {collapsed && (
-                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap shadow-xl z-50">
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-brand-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap shadow-xl z-50">
                     {item.label}
                   </div>
                 )}
@@ -117,7 +117,7 @@ const Sidebar = ({ role, collapsed, onToggle }) => {
         <div className="p-3 border-t border-white/10 space-y-1">
           <button
             onClick={onToggle}
-            className="w-full hidden lg:flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            className="w-full hidden lg:flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-brand-300/60 hover:text-white hover:bg-white/5 transition-all"
           >
             {collapsed ? <ChevronRight className="w-5 h-5 mx-auto" /> : <><ChevronLeft className="w-5 h-5" /><span>Collapse</span></>}
           </button>
