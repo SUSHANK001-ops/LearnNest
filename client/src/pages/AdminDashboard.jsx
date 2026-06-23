@@ -79,7 +79,7 @@ const AdminDashboard = () => {
   };
 
   const stats = [
-    { label: 'Students', value: students.length, icon: GraduationCap, color: 'from-blue-500 to-cyan-400', bg: 'bg-blue-50', text: 'text-blue-600' },
+    { label: 'Students', value: students.length, icon: GraduationCap, color: 'from-blue-500 to-cyan-400', bg: 'bg-brand-50', text: 'text-brand-600' },
     { label: 'Courses', value: courses.length, icon: BookOpen, color: 'from-emerald-500 to-teal-400', bg: 'bg-emerald-50', text: 'text-emerald-600' },
     { label: 'Teachers', value: teachers.length, icon: Users, color: 'from-purple-500 to-violet-400', bg: 'bg-accent-50', text: 'text-accent-600' },
     { label: 'Storage', value: analytics?.storage?.totalMB ? `${analytics.storage.totalMB} MB` : '0 MB', icon: BarChart3, color: 'from-amber-500 to-orange-400', bg: 'bg-amber-50', text: 'text-amber-600' },
@@ -192,7 +192,7 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Add Course', icon: BookOpen, color: 'bg-brand-50 text-brand-600 hover:bg-brand-100', action: () => openModal('course') },
-                    { label: 'Add Student', icon: GraduationCap, color: 'bg-blue-50 text-blue-600 hover:bg-blue-100', action: () => openModal('student') },
+                    { label: 'Add Student', icon: GraduationCap, color: 'bg-brand-50 text-brand-600 hover:bg-brand-100', action: () => openModal('student') },
                     { label: 'Add Teacher', icon: Users, color: 'bg-accent-50 text-accent-600 hover:bg-accent-100', action: () => openModal('teacher') },
                     { label: 'Bulk Import', icon: Upload, color: 'bg-amber-50 text-amber-600 hover:bg-amber-100', action: () => navigate('/admin/bulk-import') },
                   ].map((action, i) => {
@@ -269,7 +269,7 @@ const AdminDashboard = () => {
                     {students.map(s => (
                       <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-6 py-4"><div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-semibold">{s.name[0]}</div>
+                          <div className="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-semibold">{s.name[0]}</div>
                           <span className="text-sm font-medium text-slate-800">{s.name}</span>
                         </div></td>
                         <td className="px-6 py-4 text-sm text-slate-500">{s.email}</td>
