@@ -127,9 +127,9 @@ const MyInstitutionCard = ({ institution, loading }) => {
           {/* Address */}
           <div className="flex items-start gap-3 md:col-span-2">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-accent-100 rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-purple-600"
+                  className="w-6 h-6 text-accent-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

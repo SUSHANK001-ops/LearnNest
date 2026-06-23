@@ -21,8 +21,8 @@ const TeacherList = ({ teachers, onEdit, onDelete, onAssign }) => {
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600 font-semibold text-lg">
+              <div className="h-12 w-12 bg-accent-100 rounded-full flex items-center justify-center">
+                <span className="text-accent-600 font-semibold text-lg">
                   {teacher.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -45,7 +45,7 @@ const TeacherList = ({ teachers, onEdit, onDelete, onAssign }) => {
                 teacher.assignedCourses.map((course) => (
                   <div
                     key={course.id}
-                    className="text-sm bg-purple-50 text-purple-700 px-3 py-1.5 rounded-md"
+                    className="text-sm bg-accent-50 text-accent-700 px-3 py-1.5 rounded-md"
                   >
                     📘 {course.title}
                   </div>

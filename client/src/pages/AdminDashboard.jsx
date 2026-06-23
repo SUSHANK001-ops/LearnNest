@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   const stats = [
     { label: 'Students', value: students.length, icon: GraduationCap, color: 'from-blue-500 to-cyan-400', bg: 'bg-blue-50', text: 'text-blue-600' },
     { label: 'Courses', value: courses.length, icon: BookOpen, color: 'from-emerald-500 to-teal-400', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    { label: 'Teachers', value: teachers.length, icon: Users, color: 'from-purple-500 to-violet-400', bg: 'bg-purple-50', text: 'text-purple-600' },
+    { label: 'Teachers', value: teachers.length, icon: Users, color: 'from-purple-500 to-violet-400', bg: 'bg-accent-50', text: 'text-accent-600' },
     { label: 'Storage', value: analytics?.storage?.totalMB ? `${analytics.storage.totalMB} MB` : '0 MB', icon: BarChart3, color: 'from-amber-500 to-orange-400', bg: 'bg-amber-50', text: 'text-amber-600' },
   ];
 
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
   if (loading) return (
     <DashboardLayout role="institution_admin">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -168,12 +168,12 @@ const AdminDashboard = () => {
               <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base font-semibold text-slate-800">Recent Courses</h3>
-                  <button onClick={() => setActiveTab('courses')} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">View All</button>
+                  <button onClick={() => setActiveTab('courses')} className="text-xs text-brand-600 hover:text-brand-700 font-medium">View All</button>
                 </div>
                 <div className="space-y-3">
                   {courses.slice(0, 5).map(course => (
                     <div key={course.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shrink-0">
                         <BookOpen className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -191,9 +191,9 @@ const AdminDashboard = () => {
                 <h3 className="text-base font-semibold text-slate-800 mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Add Course', icon: BookOpen, color: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100', action: () => openModal('course') },
+                    { label: 'Add Course', icon: BookOpen, color: 'bg-brand-50 text-brand-600 hover:bg-brand-100', action: () => openModal('course') },
                     { label: 'Add Student', icon: GraduationCap, color: 'bg-blue-50 text-blue-600 hover:bg-blue-100', action: () => openModal('student') },
-                    { label: 'Add Teacher', icon: Users, color: 'bg-purple-50 text-purple-600 hover:bg-purple-100', action: () => openModal('teacher') },
+                    { label: 'Add Teacher', icon: Users, color: 'bg-accent-50 text-accent-600 hover:bg-accent-100', action: () => openModal('teacher') },
                     { label: 'Bulk Import', icon: Upload, color: 'bg-amber-50 text-amber-600 hover:bg-amber-100', action: () => navigate('/admin/bulk-import') },
                   ].map((action, i) => {
                     const Icon = action.icon;
@@ -214,7 +214,7 @@ const AdminDashboard = () => {
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-slate-800">{courses.length} Courses</h2>
-                <button onClick={() => openModal('course')} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium shadow-lg shadow-indigo-500/20">
+                <button onClick={() => openModal('course')} className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium shadow-lg shadow-brand-500/20">
                   <Plus className="w-4 h-4" /> Add Course
                 </button>
               </div>
@@ -222,7 +222,7 @@ const AdminDashboard = () => {
                 {courses.map(course => (
                   <div key={course.id} className="bg-white rounded-2xl border border-slate-200/60 p-5 hover:shadow-lg transition-all group">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center">
                         <BookOpen className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-slate-800">{students.length} Students</h2>
-                <button onClick={() => openModal('student')} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium shadow-lg shadow-indigo-500/20">
+                <button onClick={() => openModal('student')} className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium shadow-lg shadow-brand-500/20">
                   <Plus className="w-4 h-4" /> Add Student
                 </button>
               </div>
@@ -273,9 +273,9 @@ const AdminDashboard = () => {
                           <span className="text-sm font-medium text-slate-800">{s.name}</span>
                         </div></td>
                         <td className="px-6 py-4 text-sm text-slate-500">{s.email}</td>
-                        <td className="px-6 py-4"><span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-lg">{s.enrolledCourses?.length || 0} courses</span></td>
+                        <td className="px-6 py-4"><span className="px-2.5 py-1 bg-brand-50 text-brand-700 text-xs font-medium rounded-lg">{s.enrolledCourses?.length || 0} courses</span></td>
                         <td className="px-6 py-4 text-right">
-                          <button onClick={() => openModal('student', s)} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium mr-3">Edit</button>
+                          <button onClick={() => openModal('student', s)} className="text-xs text-brand-600 hover:text-brand-700 font-medium mr-3">Edit</button>
                           <button onClick={() => handleDelete('student', s.id)} className="text-xs text-red-500 hover:text-red-600 font-medium">Delete</button>
                         </td>
                       </tr>
@@ -292,7 +292,7 @@ const AdminDashboard = () => {
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-slate-800">{teachers.length} Teachers</h2>
-                <button onClick={() => openModal('teacher')} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium shadow-lg shadow-indigo-500/20">
+                <button onClick={() => openModal('teacher')} className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium shadow-lg shadow-brand-500/20">
                   <Plus className="w-4 h-4" /> Add Teacher
                 </button>
               </div>

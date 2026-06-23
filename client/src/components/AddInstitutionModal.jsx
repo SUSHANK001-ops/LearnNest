@@ -41,8 +41,8 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Add New Institution</h2>
+        <div className="px-6 py-4 border-b border-surface-200">
+          <h2 className="text-xl font-semibold text-surface-800">Add New Institution</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-4">
@@ -54,7 +54,7 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-surface-700 mb-1">
                 Institution Name *
               </label>
               <input
@@ -64,13 +64,13 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 placeholder="Enter institution name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">
                 Email *
               </label>
               <input
@@ -80,13 +80,13 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 placeholder="contact@institution.com"
               />
             </div>
 
             <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="address" className="block text-sm font-medium text-surface-700 mb-1">
                 Address *
               </label>
               <textarea
@@ -96,13 +96,13 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleChange}
                 required
                 rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 placeholder="Enter full address"
               />
             </div>
 
             <div>
-              <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="domain" className="block text-sm font-medium text-surface-700 mb-1">
                 Domain (Subdomain) *
               </label>
               <input
@@ -113,10 +113,10 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleChange}
                 required
                 pattern="^[a-z0-9.-]+$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 placeholder="learnnest.example.com or institution-name"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-surface-500">
                 Lowercase letters, numbers, hyphens, and dots allowed
               </p>
             </div>
@@ -126,14 +126,14 @@ const AddInstitutionModal = ({ isOpen, onClose, onSubmit }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 text-surface-700 bg-surface-100 rounded-md hover:bg-surface-200 transition-colors"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Creating...' : 'Create Institution'}

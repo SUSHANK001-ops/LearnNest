@@ -44,11 +44,11 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-surface-100">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">LearnNest</h1>
-          <p className="text-gray-600 mt-2">Create your account</p>
+          <h1 className="text-3xl font-bold text-surface-900">LearnNest</h1>
+          <p className="text-surface-600 mt-2">Create your account</p>
         </div>
 
         <form onSubmit={submit} className="space-y-4">
@@ -60,27 +60,27 @@ export default function Register() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="firstname" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="firstname" className="block text-sm font-medium text-surface-700 mb-1">
                 First Name
               </label>
               <input
                 id="firstname"
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={firstname}
                 onChange={(e) => setFirstname(e.target.value)}
                 placeholder="Sushank"
               />
             </div>
             <div>
-              <label htmlFor="lastname" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="lastname" className="block text-sm font-medium text-surface-700 mb-1">
                 Last Name
               </label>
               <input
                 id="lastname"
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={lastname}
                 onChange={(e) => setLastname(e.target.value)}
                 placeholder="Lamichhane"
@@ -89,14 +89,14 @@ export default function Register() {
           </div>
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="username" className="block text-sm font-medium text-surface-700 mb-1">
               Username
             </label>
             <input
               id="username"
               type="text"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="sushanklamichhane"
@@ -104,14 +104,14 @@ export default function Register() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">
               Email
             </label>
             <input
               id="email"
               type="email"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
@@ -119,7 +119,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-surface-700 mb-1">
               Password
             </label>
             <input
@@ -127,7 +127,7 @@ export default function Register() {
               type="password"
               required
               minLength={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
@@ -137,15 +137,15 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-brand-600 text-white py-2 px-4 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-6 text-center text-sm text-surface-600">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/login" className="text-brand-600 hover:text-brand-700 font-medium">
             Sign in here
           </Link>
         </div>

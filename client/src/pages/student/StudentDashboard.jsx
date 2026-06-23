@@ -31,15 +31,15 @@ const StudentDashboard = () => {
   };
 
   const stats = [
-    { label: 'Enrolled Courses', value: courses.length, icon: BookOpen, bg: 'bg-indigo-50', text: 'text-indigo-600' },
-    { label: 'Available Quizzes', value: quizzes.length, icon: ClipboardList, bg: 'bg-purple-50', text: 'text-purple-600' },
+    { label: 'Enrolled Courses', value: courses.length, icon: BookOpen, bg: 'bg-brand-50', text: 'text-brand-600' },
+    { label: 'Available Quizzes', value: quizzes.length, icon: ClipboardList, bg: 'bg-accent-50', text: 'text-accent-600' },
     { label: 'Notifications', value: notifications.length, icon: Bell, bg: 'bg-amber-50', text: 'text-amber-600' },
   ];
 
   if (loading) return (
     <DashboardLayout role="student">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -82,7 +82,7 @@ const StudentDashboard = () => {
                 onClick={() => navigate(`/student/courses/${course.id}`)}
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shrink-0">
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -106,14 +106,14 @@ const StudentDashboard = () => {
                 onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
               >
-                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
-                  <ClipboardList className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 bg-accent-100 rounded-xl flex items-center justify-center shrink-0">
+                  <ClipboardList className="w-5 h-5 text-accent-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{quiz.title}</p>
                   <p className="text-xs text-slate-500">{quiz._count?.questions || 0} questions • {quiz.totalMarks} marks</p>
                 </div>
-                <span className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-indigo-50 text-indigo-700">
+                <span className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-brand-50 text-brand-700">
                   {quiz.duration ? `${quiz.duration} min` : 'Untimed'}
                 </span>
               </button>
@@ -127,9 +127,9 @@ const StudentDashboard = () => {
           <h3 className="text-base font-semibold text-slate-800 mb-4">Recent Notifications</h3>
           <div className="space-y-2">
             {notifications.map(n => (
-              <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl ${!n.isRead ? 'bg-indigo-50/50' : 'hover:bg-slate-50'} transition-colors`}>
-                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                  <Bell className="w-4 h-4 text-indigo-600" />
+              <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl ${!n.isRead ? 'bg-brand-50/50' : 'hover:bg-slate-50'} transition-colors`}>
+                <div className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                  <Bell className="w-4 h-4 text-brand-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800">{n.title}</p>

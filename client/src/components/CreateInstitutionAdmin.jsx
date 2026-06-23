@@ -154,18 +154,18 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-surface-100">
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create Institution Admin</h1>
-              <p className="text-sm text-gray-600 mt-1">Add a new admin for an institution</p>
+              <h1 className="text-2xl font-bold text-surface-900">Create Institution Admin</h1>
+              <p className="text-sm text-surface-600 mt-1">Add a new admin for an institution</p>
             </div>
             <button
               onClick={() => navigate('/superadmin/dashboard')}
-              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              className="px-4 py-2 bg-surface-600 text-white rounded-md hover:bg-surface-700 transition-colors"
             >
               Back to Dashboard
             </button>
@@ -184,20 +184,20 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
             )}
 
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded">
                 {success}
               </div>
             )}
 
             {/* Institution Selection */}
             <div>
-              <label htmlFor="institution" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="institution" className="block text-sm font-medium text-surface-700 mb-1">
                 Select Institution *
               </label>
               <select
                 id="institution"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={institutionId}
                 onChange={(e) => setInstitutionId(e.target.value)}
               >
@@ -208,34 +208,34 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-surface-500">
                 Select the institution this admin will manage
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstname" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="firstname" className="block text-sm font-medium text-surface-700 mb-1">
                   First Name *
                 </label>
                 <input
                   id="firstname"
                   type="text"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={firstname}
                   onChange={(e) => setFirstname(e.target.value)}
                   placeholder="Sushank"
                 />
               </div>
               <div>
-                <label htmlFor="lastname" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="lastname" className="block text-sm font-medium text-surface-700 mb-1">
                   Last Name
                 </label>
                 <input
                   id="lastname"
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={lastname}
                   onChange={(e) => setLastname(e.target.value)}
                   placeholder="Lamichhane"
@@ -244,14 +244,14 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
             </div>
 
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="username" className="block text-sm font-medium text-surface-700 mb-1">
                 Username *
               </label>
               <input
                 id="username"
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="sushanklamichhane"
@@ -259,14 +259,14 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">
                 Email *
               </label>
               <input
                 id="email"
                 type="email"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
@@ -274,7 +274,7 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-surface-700 mb-1">
                 Password *
               </label>
               <input
@@ -282,7 +282,7 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
                 type="password"
                 required
                 minLength={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
@@ -292,7 +292,7 @@ Created At: ${new Date(adminData.createdAt).toLocaleString()}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-brand-600 text-white py-2 px-4 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Creating Admin...' : 'Create Institution Admin'}
             </button>

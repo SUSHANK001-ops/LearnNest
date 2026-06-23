@@ -87,7 +87,7 @@ const StudentQuizPage = () => {
   if (loading) return (
     <DashboardLayout role="student">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -120,7 +120,7 @@ const StudentQuizPage = () => {
             </div>
           </div>
 
-          <button onClick={() => navigate('/student/dashboard')} className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium">
+          <button onClick={() => navigate('/student/dashboard')} className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-medium">
             Back to Dashboard
           </button>
         </div>
@@ -156,7 +156,7 @@ const StudentQuizPage = () => {
           <span>{Math.round((Object.keys(answers).length / questions.length) * 100)}%</span>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
+          <div className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500"
             style={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }} />
         </div>
       </div>
@@ -166,7 +166,7 @@ const StudentQuizPage = () => {
         {questions.map((q, idx) => (
           <div key={q.id} className="bg-white rounded-2xl border border-slate-200/60 p-6 hover:shadow-sm transition-shadow">
             <div className="flex items-start gap-3 mb-4">
-              <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 text-sm font-bold shrink-0">{idx + 1}</span>
+              <span className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center text-brand-700 text-sm font-bold shrink-0">{idx + 1}</span>
               <p className="text-sm font-medium text-slate-800 pt-1">{q.questionText}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-11">
@@ -176,7 +176,7 @@ const StudentQuizPage = () => {
                   onClick={() => handleAnswer(q.id, opt)}
                   className={`flex items-center gap-3 p-3 rounded-xl text-sm text-left transition-all ${
                     answers[q.id] === opt
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                      ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/20'
                       : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60'
                   }`}
                 >
@@ -199,7 +199,7 @@ const StudentQuizPage = () => {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 shadow-lg shadow-indigo-500/20"
+            className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-medium disabled:opacity-50 shadow-lg shadow-brand-500/20"
           >
             {submitting ? 'Submitting...' : 'Submit Quiz'}
           </button>

@@ -48,7 +48,7 @@ const StudentCoursePage = () => {
   if (loading) return (
     <DashboardLayout role="student">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -86,7 +86,7 @@ const StudentCoursePage = () => {
       {/* Breadcrumb */}
       {currentFolder && (
         <div className="flex items-center gap-2 mb-4 text-sm">
-          <button onClick={() => setCurrentFolder(null)} className="text-indigo-600 hover:text-indigo-700 font-medium">Root</button>
+          <button onClick={() => setCurrentFolder(null)} className="text-brand-600 hover:text-brand-700 font-medium">Root</button>
           <span className="text-slate-300">/</span>
           <span className="text-slate-600">Current Folder</span>
         </div>
@@ -120,7 +120,7 @@ const StudentCoursePage = () => {
             <p className="font-medium text-slate-800 text-sm truncate">{file.originalName}</p>
             <p className="text-xs text-slate-400 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
             <a href={file.storageUrl} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-3 text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+              className="inline-flex items-center gap-1 mt-3 text-xs text-brand-600 hover:text-brand-700 font-medium">
               <Download className="w-3.5 h-3.5" /> Download
             </a>
           </div>
@@ -133,8 +133,8 @@ const StudentCoursePage = () => {
             onClick={() => setActiveVideo(video)}
             className="bg-white rounded-2xl border border-slate-200/60 p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all text-left"
           >
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${video.type === 'youtube' ? 'bg-red-100' : 'bg-purple-100'}`}>
-              {video.type === 'youtube' ? <Youtube className="w-6 h-6 text-red-600" /> : <Play className="w-6 h-6 text-purple-600" />}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${video.type === 'youtube' ? 'bg-red-100' : 'bg-accent-100'}`}>
+              {video.type === 'youtube' ? <Youtube className="w-6 h-6 text-red-600" /> : <Play className="w-6 h-6 text-accent-600" />}
             </div>
             <p className="font-medium text-slate-800 text-sm truncate">{video.title}</p>
             <p className="text-xs text-slate-400 mt-1 capitalize">{video.type} • Click to play</p>

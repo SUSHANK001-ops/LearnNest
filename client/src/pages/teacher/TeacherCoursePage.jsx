@@ -124,7 +124,7 @@ const TeacherCoursePage = () => {
   if (loading) return (
     <DashboardLayout role="teacher">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -145,7 +145,7 @@ const TeacherCoursePage = () => {
       {/* Breadcrumb */}
       {currentFolder && (
         <div className="flex items-center gap-2 mb-4 text-sm">
-          <button onClick={() => setCurrentFolder(null)} className="text-indigo-600 hover:text-indigo-700 font-medium">Root</button>
+          <button onClick={() => setCurrentFolder(null)} className="text-brand-600 hover:text-brand-700 font-medium">Root</button>
           <span className="text-slate-300">/</span>
           <span className="text-slate-600">Subfolder</span>
         </div>
@@ -154,7 +154,7 @@ const TeacherCoursePage = () => {
       {/* Actions Bar */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
         {folders.length === 0 && !currentFolder && (
-          <button onClick={initFolders} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium">
+          <button onClick={initFolders} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium">
             <FolderOpen className="w-4 h-4" /> Initialize Folders
           </button>
         )}
@@ -202,7 +202,7 @@ const TeacherCoursePage = () => {
             </div>
             <p className="font-medium text-slate-800 text-sm truncate">{file.originalName}</p>
             <p className="text-xs text-slate-400 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-            <a href={file.storageUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-xs text-indigo-600 hover:text-indigo-700 font-medium">Download →</a>
+            <a href={file.storageUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-xs text-brand-600 hover:text-brand-700 font-medium">Download →</a>
           </div>
         ))}
 
@@ -210,8 +210,8 @@ const TeacherCoursePage = () => {
         {videos.map(video => (
           <div key={video.id} className="bg-white rounded-2xl border border-slate-200/60 p-4 hover:shadow-lg transition-all group">
             <div className="flex items-start justify-between mb-3">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${video.type === 'youtube' ? 'bg-red-100' : 'bg-purple-100'}`}>
-                {video.type === 'youtube' ? <Youtube className="w-6 h-6 text-red-600" /> : <Video className="w-6 h-6 text-purple-600" />}
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${video.type === 'youtube' ? 'bg-red-100' : 'bg-accent-100'}`}>
+                {video.type === 'youtube' ? <Youtube className="w-6 h-6 text-red-600" /> : <Video className="w-6 h-6 text-accent-600" />}
               </div>
               <button onClick={() => deleteVideo(video.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                 <Trash2 className="w-4 h-4" />
@@ -236,10 +236,10 @@ const TeacherCoursePage = () => {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-slate-800 mb-4">New Folder</h3>
             <input type="text" value={folderName} onChange={e => setFolderName(e.target.value)} placeholder="Folder name"
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400" />
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-indigo-400" />
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setShowFolderModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
-              <button onClick={createFolder} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium">Create</button>
+              <button onClick={createFolder} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-medium">Create</button>
             </div>
           </div>
         </div>
@@ -252,9 +252,9 @@ const TeacherCoursePage = () => {
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Add Video</h3>
             <div className="space-y-3">
               <input type="text" value={videoForm.title} onChange={e => setVideoForm(p => ({ ...p, title: e.target.value }))} placeholder="Video title"
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400" />
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-indigo-400" />
               <input type="url" value={videoForm.youtubeUrl} onChange={e => setVideoForm(p => ({ ...p, youtubeUrl: e.target.value }))} placeholder="YouTube URL"
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400" />
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-indigo-400" />
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setShowVideoModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>

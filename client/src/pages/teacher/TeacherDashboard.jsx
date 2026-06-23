@@ -28,8 +28,8 @@ const TeacherDashboard = () => {
   };
 
   const stats = [
-    { label: 'My Courses', value: courses.length, icon: BookOpen, bg: 'bg-indigo-50', text: 'text-indigo-600' },
-    { label: 'Quizzes Created', value: quizzes.length, icon: ClipboardList, bg: 'bg-purple-50', text: 'text-purple-600' },
+    { label: 'My Courses', value: courses.length, icon: BookOpen, bg: 'bg-brand-50', text: 'text-brand-600' },
+    { label: 'Quizzes Created', value: quizzes.length, icon: ClipboardList, bg: 'bg-accent-50', text: 'text-accent-600' },
     { label: 'Published', value: quizzes.filter(q => q.isPublished).length, icon: TrendingUp, bg: 'bg-emerald-50', text: 'text-emerald-600' },
     { label: 'Total Students', value: courses.reduce((a, c) => a + (c.students?.length || 0), 0), icon: Users, bg: 'bg-blue-50', text: 'text-blue-600' },
   ];
@@ -37,7 +37,7 @@ const TeacherDashboard = () => {
   if (loading) return (
     <DashboardLayout role="teacher">
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -82,7 +82,7 @@ const TeacherDashboard = () => {
                 onClick={() => navigate(`/teacher/courses/${course.id}`)}
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shrink-0">
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -102,7 +102,7 @@ const TeacherDashboard = () => {
         <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-slate-800">Recent Quizzes</h3>
-            <button onClick={() => navigate('/teacher/quizzes')} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">View All</button>
+            <button onClick={() => navigate('/teacher/quizzes')} className="text-xs text-brand-600 hover:text-brand-700 font-medium">View All</button>
           </div>
           <div className="space-y-3">
             {quizzes.slice(0, 5).map(quiz => (
